@@ -1083,7 +1083,6 @@ microsoft-365-entra-intune-lab/
 │
 ├── README.md
 ├── SCREENSHOTS.md
-├── .gitignore
 │
 └── screenshots/
     ├── 01-microsoft-365-tenant-created.png
