@@ -489,7 +489,7 @@ I then analyzed a real OfficeHome sign-in.
 
 The authentication details showed successful authentication and that the existing authentication context satisfied the MFA requirement.
 
-![MFA authentication details](screenshots/27-mfa-authentication-details-verified.png)
+![MFA authentication details](screenshots/27-windows-hello-authentication-verified.png)
 
 The custom policy was evaluated against the real sign-in and returned:
 
