@@ -74,7 +74,7 @@ Microsoft 365 Business Premium
 
 I created a Microsoft 365 Business Premium tenant for the fictional company **Cobo Technologies**.
 
-This tenant became the foundation for the Entra ID, Intune, licensing, Conditional Access, and endpoint-management portions of the lab.
+The tenant became the foundation for the Entra ID, Intune, licensing, Conditional Access, and endpoint-management portions of the lab.
 
 ![Microsoft 365 tenant created](screenshots/01-microsoft-365-tenant-created.png)
 
@@ -104,17 +104,15 @@ and added Alex as a member.
 
 ![IT security group](screenshots/03-entra-id-it-security-group.png)
 
----
-
 ## Bulk User Provisioning
 
-To practice a more scalable user-provisioning workflow, I used Microsoft's bulk user creation process with a CSV template.
+To practice a more scalable user-provisioning workflow, I used Microsoft's bulk-user creation process with a CSV template.
 
 Additional users were created across several departments.
 
 ![Bulk Entra users created](screenshots/04-entra-id-bulk-users-created.png)
 
-I organized users into departmental security groups:
+I organized the users into departmental security groups:
 
 ```text
 SG-IT-Users
@@ -128,18 +126,18 @@ SG-Sales-Users
 
 # 3. Microsoft 365 Licensing
 
-Users exist independently from Microsoft 365 service licenses.
+Microsoft Entra identities can exist independently of Microsoft 365 service licenses.
 
-I assigned Microsoft 365 Business Premium to the pilot user while leaving other lab users unlicensed until needed.
+I assigned Microsoft 365 Business Premium to the pilot user while leaving other lab users unlicensed until their scenarios required licensing.
 
 ![Microsoft 365 license assigned](screenshots/06-microsoft-365-license-assigned.png)
 
-This reinforced the distinction between:
+This reinforced the distinction between identity and service entitlement:
 
 ```text
-Entra identity
+Microsoft Entra identity
         |
-        +--> User exists
+        +--> User account exists
 
 Microsoft 365 license
         |
@@ -150,9 +148,9 @@ Microsoft 365 license
 
 # 4. Intune Automatic Enrollment
 
-I configured Intune automatic enrollment for members of the IT security group.
+I configured Microsoft Intune automatic enrollment for members of the IT security group.
 
-The MDM scope was configured for:
+The MDM enrollment scope was configured for:
 
 ```text
 SG-IT-Users
@@ -202,6 +200,8 @@ Primary user: Alex Rivera
 
 ![Intune enrollment verified](screenshots/09-intune-device-enrollment-verified.png)
 
+This demonstrated that Microsoft Entra join and Intune enrollment are related but separate device states.
+
 ---
 
 # 6. Intune Device Configuration
@@ -239,7 +239,7 @@ Status: OK
 
 ![Edge policy verified](screenshots/12-intune-edge-policy-verified.png)
 
-This demonstrated the complete workflow:
+The workflow was:
 
 ```text
 Create policy
@@ -265,8 +265,6 @@ I created a Windows compliance policy requiring Microsoft Defender Firewall.
 Initially, `WIN11-INTUNE01` was compliant.
 
 ![Firewall compliance verified](screenshots/14-intune-firewall-compliance-verified.png)
-
----
 
 ## Compliance Troubleshooting Scenario
 
@@ -326,6 +324,8 @@ Restore firewall
 Verify compliance
 ```
 
+This also reinforced the difference between configuration and compliance policies. Configuration policies change endpoint settings, while compliance policies evaluate whether the endpoint meets organizational requirements.
+
 ---
 
 # 8. Microsoft Store Application Deployment
@@ -384,12 +384,13 @@ The uninstall command was:
 msiexec /x "{23170F69-40C1-2702-2603-000001000000}" /qn /norestart
 ```
 
-The deployment also included:
+The deployment included:
 
-- x64 architecture requirement
-- Windows version requirement
+- x64 architecture requirements
+- Windows operating system requirements
 - System installation context
-- MSI detection rule
+- MSI product-code detection
+- Silent installation and uninstall commands
 - Required assignment to the pilot device group
 
 ![7-Zip Win32 app assigned](screenshots/21-intune-win32-7zip-assigned.png)
@@ -403,7 +404,7 @@ Installation status: Installed
 
 ![7-Zip installation verified](screenshots/22-intune-win32-7zip-install-verified.png)
 
-This demonstrated the complete Win32 deployment process:
+The deployment process was:
 
 ```text
 MSI installer
@@ -427,13 +428,15 @@ Device assignment
 Installed
 ```
 
+This demonstrated the difference between application requirements and detection rules. Requirements determine whether an application applies to a device, while detection rules determine whether Intune considers the application installed.
+
 ---
 
 # 10. Conditional Access and MFA
 
-I moved from Security Defaults to Microsoft's Conditional Access model.
+I transitioned from Security Defaults to Microsoft's Conditional Access model.
 
-The tenant contained Microsoft-managed baseline Conditional Access policies along with the custom pilot policy I created.
+The tenant contained Microsoft-managed Conditional Access policies along with the custom pilot policies I created.
 
 ![Conditional Access policy overview](screenshots/23-conditional-access-policy-overview.png)
 
@@ -463,8 +466,6 @@ The grant control required Microsoft's built-in MFA authentication strength.
 
 ![MFA grant control](screenshots/25-conditional-access-mfa-grant-control.png)
 
----
-
 ## Conditional Access What If Testing
 
 Before enforcing the custom policy, I used the Conditional Access **What If** tool.
@@ -482,13 +483,11 @@ The test confirmed that the custom policy would apply.
 
 ![Conditional Access What If verified](screenshots/26-conditional-access-what-if-verified.png)
 
----
-
 ## Real MFA Authentication Validation
 
 I then analyzed a real OfficeHome sign-in.
 
-The authentication details showed successful authentication and an existing MFA requirement being satisfied.
+The authentication details showed successful authentication and that the existing authentication context satisfied the MFA requirement.
 
 ![MFA authentication details](screenshots/27-mfa-authentication-details-verified.png)
 
@@ -500,13 +499,13 @@ Report-only: Success
 
 ![Conditional Access report-only success](screenshots/28-conditional-access-report-only-success.png)
 
-This demonstrated how Conditional Access can be tested against real authentication activity without enforcing the policy.
+This demonstrated how Conditional Access policies can be evaluated against real authentication activity before enforcement.
 
 ---
 
 # 11. Conditional Access with Intune Device Compliance
 
-I created a second custom policy:
+I created a second custom Conditional Access policy:
 
 ```text
 CA-Pilot-Require-Compliant-Windows-Device
@@ -516,7 +515,7 @@ The policy targeted the Conditional Access pilot group and all resources.
 
 ![Compliant device policy](screenshots/29-conditional-access-compliant-device-policy.png)
 
-The condition was limited to:
+The device-platform condition was limited to:
 
 ```text
 Windows
@@ -532,8 +531,6 @@ Require device to be marked as compliant
 
 ![Compliant-device grant control](screenshots/31-conditional-access-compliant-device-grant.png)
 
----
-
 ## Healthy Device Test
 
 While `WIN11-INTUNE01` was compliant, the policy evaluated successfully.
@@ -544,8 +541,6 @@ Report-only: Success
 ```
 
 ![Compliant device success](screenshots/32-conditional-access-compliant-device-success.png)
-
----
 
 ## Noncompliant Device Test
 
@@ -562,7 +557,7 @@ Report-only: Failure
 
 ![Noncompliant device Conditional Access failure](screenshots/33-conditional-access-noncompliant-device-failure.png)
 
-The same Entra sign-in record showed that the actual managed endpoint was recognized:
+The same Entra sign-in record showed that the managed endpoint was correctly recognized:
 
 ```text
 Managed: Yes
@@ -572,9 +567,9 @@ Join Type: Azure AD joined
 
 ![Noncompliant managed device verified](screenshots/34-conditional-access-device-noncompliant-verified.png)
 
-This proved that the failure was caused by the device's compliance state rather than missing device identity.
+The `Azure AD joined` wording shown in the sign-in record is Microsoft's older terminology for a Microsoft Entra joined device.
 
----
+This confirmed that the policy failure was caused by the endpoint's compliance state rather than missing device identity.
 
 ## Compliance Restored
 
@@ -594,7 +589,7 @@ Report-only: Success
 
 ![Conditional Access compliance restored](screenshots/35-conditional-access-compliance-restored.png)
 
-The complete workflow demonstrated:
+The complete relationship was:
 
 ```text
 Endpoint security state
@@ -652,8 +647,6 @@ DG-Windows-Pilot
 
 ![Windows Update ring settings](screenshots/36-intune-windows-update-ring-settings.png)
 
----
-
 ## Endpoint Verification
 
 I verified the policy directly on `WIN11-INTUNE01` under:
@@ -683,7 +676,7 @@ Active hours: 8:00 AM - 5:00 PM
 
 ![Windows Update policy details](screenshots/38-windows-update-policy-details-verified.png)
 
-This confirmed that the Intune Update Ring was successfully applied to the endpoint.
+This confirmed that the Intune Update Ring successfully reached the endpoint.
 
 ---
 
@@ -691,27 +684,31 @@ This confirmed that the Intune Update Ring was successfully applied to the endpo
 
 Before creating the Intune BitLocker policy, I verified the VM's security prerequisites.
 
-I checked:
+I checked the Trusted Platform Module:
 
 ```powershell
 Get-Tpm | Select-Object TpmPresent,TpmReady,TpmEnabled,TpmActivated
 ```
 
-I also verified:
+I verified Secure Boot:
 
 ```powershell
 Confirm-SecureBootUEFI
 ```
 
+I verified the firmware type:
+
 ```powershell
 Get-ComputerInfo | Select-Object BiosFirmwareType
 ```
+
+I checked Windows Recovery Environment:
 
 ```cmd
 reagentc /info
 ```
 
-and:
+I also checked BitLocker status:
 
 ```powershell
 Get-BitLockerVolume -MountPoint "C:"
@@ -737,8 +734,6 @@ EncryptionMethod: XtsAes128
 
 ![BitLocker prerequisite and encryption status](screenshots/39-bitlocker-preflight-and-encryption-status.png)
 
----
-
 ## Intune BitLocker Policy
 
 I created:
@@ -759,15 +754,13 @@ The policy configured TPM-based startup behavior.
 
 ![BitLocker TPM settings](screenshots/41-intune-bitlocker-tpm-settings.png)
 
-I also configured recovery behavior, including a 48-digit recovery password and centralized recovery information.
+I also configured recovery behavior, including a 48-digit recovery password and centralized recovery-information storage.
 
 ![BitLocker recovery settings](screenshots/42-intune-bitlocker-recovery-settings.png)
 
----
-
 ## Recovery Key Escrow Verification
 
-I verified that the operating system drive had a BitLocker recovery-key record available through Intune without exposing the actual recovery password.
+I verified that the operating-system drive had a BitLocker recovery-key record available through Intune without exposing the actual recovery password.
 
 ![BitLocker recovery key escrow verified](screenshots/43-bitlocker-recovery-key-escrow-verified.png)
 
@@ -799,7 +792,7 @@ I assigned Microsoft 365 Business Premium to the account.
 
 ![Business Premium license assigned](screenshots/46-microsoft-365-business-premium-license-assigned.png)
 
-Elena completed initial password change and MFA enrollment.
+Elena completed the initial password change and MFA enrollment.
 
 A healthy OfficeHome sign-in was recorded as:
 
@@ -809,15 +802,13 @@ Status: Success
 
 ![Help desk baseline sign-in](screenshots/47-entra-helpdesk-baseline-signin-success.png)
 
----
-
 ## Simulated Account Access Incident
 
 I administratively blocked Elena from signing in.
 
 ![User sign-in blocked](screenshots/48-helpdesk-user-signin-blocked.png)
 
-When Elena attempted to sign in again, the user-facing message stated:
+When Elena attempted to authenticate again, the user-facing message stated:
 
 ```text
 Your account has been locked.
@@ -826,7 +817,7 @@ Contact your support person to unlock it, then try again.
 
 ![Blocked user sign-in failure](screenshots/49-helpdesk-blocked-user-signin-failure.png)
 
-Rather than assuming the password was incorrect, I investigated the Entra sign-in logs.
+Rather than assuming the password was incorrect, I investigated the Microsoft Entra sign-in logs.
 
 The actual failure showed:
 
@@ -842,9 +833,7 @@ The user account is disabled.
 
 ![Blocked sign-in diagnosed](screenshots/50-entra-helpdesk-blocked-signin-diagnosed.png)
 
-This demonstrated why Entra sign-in logs are more useful than relying only on the end-user error message.
-
----
+This demonstrated why Entra sign-in logs provide more useful diagnostic information than relying only on the end-user error message.
 
 ## Account Recovery
 
@@ -860,7 +849,7 @@ Status: Success
 
 ![Restored sign-in verified](screenshots/52-entra-helpdesk-signin-restored-verified.png)
 
-The complete troubleshooting sequence was:
+The complete troubleshooting workflow was:
 
 ```text
 Healthy account
@@ -926,8 +915,6 @@ Cobo-LAPSAdmin
 
 ![Windows LAPS policy configured](screenshots/54-intune-windows-laps-policy-configured.png)
 
----
-
 ## Endpoint Verification
 
 After syncing the endpoint, Windows automatically created:
@@ -953,28 +940,15 @@ Windows also identified it as automatically managed by the organization.
 
 ![LAPS local administrator created](screenshots/55-windows-laps-local-admin-created.png)
 
----
-
 ## LAPS Password Backup
 
-Intune displayed the LAPS password record without exposing the password itself.
+Intune displayed the LAPS password record without exposing the actual password.
 
-The page showed:
-
-```text
-Account:
-Cobo-LAPSAdmin
-
-Last password rotation:
-Recorded
-
-Next password rotation:
-Recorded
-```
+The page showed the managed account along with its last and next password-rotation timestamps.
 
 ![LAPS password backup verified](screenshots/56-laps-password-backup-verified.png)
 
-This demonstrated centralized local-administrator password management and automatic password rotation.
+This demonstrated centralized local-administrator password management and automatic credential rotation.
 
 ---
 
@@ -1007,7 +981,7 @@ Your device administrator has scheduled a reboot
 
 ![Remote restart received](screenshots/58-intune-remote-restart-received.png)
 
-This demonstrated direct administrative control of an Intune-managed Windows endpoint.
+This demonstrated direct remote administration of an Intune-managed Windows endpoint.
 
 ---
 
@@ -1019,8 +993,8 @@ This demonstrated direct administrative control of an Intune-managed Windows end
 | Conditional Access device failure | Entra identified managed device as noncompliant | Restored endpoint compliance |
 | Missing device identity | Sign-in showed no Device ID and Managed: No | Retested through managed Edge profile |
 | Blocked Microsoft 365 user | Entra error 50057 identified disabled account | Restored account sign-in |
-| Win32 deployment reporting delay | Application installed before portal status updated | Verified endpoint and waited for Intune reporting |
-| LAPS account creation delay | Managed account had not yet processed | Synced device and triggered policy processing |
+| Win32 deployment reporting delay | Application installed before portal status updated | Verified endpoint and allowed Intune reporting to catch up |
+| LAPS account creation delay | Managed account had not yet processed | Synced device and verified automatic account creation |
 
 ---
 
@@ -1037,11 +1011,12 @@ This project reinforced several important Microsoft administration concepts:
 - Win32 requirement rules determine whether an application applies to a device.
 - Win32 detection rules determine whether an application is installed.
 - Conditional Access should be tested before enforcement.
-- Report-only mode provides a safe way to validate access policies.
+- Report-only mode provides a safer way to validate access policies.
 - Device-based Conditional Access depends on valid device identity being included in the sign-in.
 - Intune reporting can lag behind the actual endpoint state.
-- BitLocker recovery passwords should be centrally managed without being exposed publicly.
-- Windows LAPS reduces the risk of shared or static local administrator passwords.
+- Windows Update Rings control update behavior and timing.
+- BitLocker recovery information should be centrally managed without exposing recovery credentials.
+- Windows LAPS reduces the risk associated with shared or static local administrator passwords.
 - Sign-in logs provide more accurate troubleshooting information than generic user-facing errors.
 - Pilot groups provide a safer method for testing policies before broader deployment.
 
@@ -1082,7 +1057,6 @@ This project reinforced several important Microsoft administration concepts:
 microsoft-365-entra-intune-lab/
 │
 ├── README.md
-├── SCREENSHOTS.md
 │
 └── screenshots/
     ├── 01-microsoft-365-tenant-created.png
@@ -1096,38 +1070,26 @@ microsoft-365-entra-intune-lab/
 
 ---
 
-# Security and Repository Hygiene
+# Security Considerations
 
-This repository intentionally does **not** contain:
+Sensitive credentials and recovery information were never included in this repository or exposed in screenshots.
+
+This includes:
 
 - User passwords
 - Temporary passwords
-- MFA QR codes
-- Authenticator secrets
+- MFA QR codes and authentication secrets
 - MFA verification codes
 - BitLocker recovery passwords
-- LAPS-managed local administrator passwords
-- Bulk provisioning CSV files containing passwords
+- Windows LAPS-managed passwords
 - Microsoft 365 billing information
-- Third-party installers
-- `.intunewin` application packages
 
-Screenshots are used to provide configuration and troubleshooting evidence while keeping credentials and recovery secrets protected.
+Application installers, Intune deployment packages, and provisioning files containing temporary credentials were used only within the lab environment and are not included in the repository.
 
 ---
 
-# Screenshot Evidence Index
-
-The README documents the complete workflow inline.
-
-A separate screenshot index is also available for quickly locating individual pieces of evidence:
-
-[View the complete screenshot evidence index](SCREENSHOTS.md)
-
----
-
-## Project Status
+# Project Status
 
 **Completed**
 
-The final lab demonstrates an end-to-end Microsoft cloud administration environment covering identity, licensing, endpoint enrollment, policy deployment, application management, compliance, Conditional Access, Windows security, account troubleshooting, credential management, and remote device administration.
+This lab demonstrates an end-to-end Microsoft cloud administration environment covering identity, licensing, endpoint enrollment, policy deployment, application management, compliance, Conditional Access, Windows security, account troubleshooting, credential management, and remote endpoint administration.
